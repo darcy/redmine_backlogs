@@ -3,6 +3,20 @@ include RbCommonHelper
 class RbMasterBacklogsController < RbApplicationController
   unloadable
 
+  def set_positions
+    sprints = RbSprint.open_sprints(@project)
+    sprints.each do |s|
+      s.stories.each_with_index do |st,i|
+        RbStory.update_all(["position=?",i], :id => st.id) #update all to bypass any filters
+      end
+    end
+    product_backlog_stories = RbStory.product_backlog(@project)
+    product_backlog_stories.each_with_index do |st,i|
+      RbStory.update_all(["position=?",i], :id => st.id) #update all to bypass any filters
+    end
+    redirect_to "/rb/master_backlog/#{@project.identifier}"
+  end
+  
   def show
     product_backlog_stories = RbStory.product_backlog(@project)
     sprints = RbSprint.open_sprints(@project)
